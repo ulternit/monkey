@@ -7,87 +7,79 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Video Loop</title>
+<title>Monkey</title>
 
 <style>
-    html, body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        background: black;
-        overflow: hidden;
-    }
+html, body {
+    margin: 0;
+    padding: 0;
+    background: black;
+    height: 100%;
+    overflow: hidden;
+}
 
-    #video {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        min-width: 100%;
-        min-height: 100%;
-        transform: translate(-50%, -50%);
-        object-fit: cover;
-        pointer-events: none; /* prevents clicking */
-    }
+/* Fullscreen fixed video */
+#bgVideo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    pointer-events: none; /* prevents clicking pause */
+}
 </style>
 
 
 
 
-<video id="video" autoplay="" muted="" loop="" playsinline="" preload="auto">
+<video id="bgVideo" autoplay="" muted="" loop="" playsinline="" preload="auto">
 </video>
 
 <script>
-/*
-  GitHub Pages cannot truly "scan folders",
-  so we attempt common locations automatically.
-  Add/remove paths if needed.
-*/
+const VIDEO_URL =
+"https://raw.githubusercontent.com/ulternit/monkey/main/ssstik.io_%40boogiebug0_1770728974944.mp4";
 
-const possibleVideos = [
-    "video.mp4",
-    "Video.mp4",
-    "media/video.mp4",
-    "assets/video.mp4",
-    "videos/video.mp4"
-];
+const video = document.getElementById("bgVideo");
+video.src = VIDEO_URL;
 
-const video = document.getElementById("video");
+/* ---------- Autoplay ---------- */
+video.addEventListener("loadeddata", () => {
+    video.play().catch(()=>{});
+});
 
-async function findVideo() {
-    for (const path of possibleVideos) {
-        try {
-            const response = await fetch(path, { method: "HEAD" });
-            if (response.ok) {
-                video.src = path;
-                video.play().catch(()=>{});
-                return;
-            }
-        } catch (e) {}
-    }
-
-    console.error("No MP4 file found.");
+/* ---------- Unmute after ANY interaction ---------- */
+function enableSound() {
+    video.muted = false;
+    video.volume = 1;
+    video.play().catch(()=>{});
+    document.removeEventListener("click", enableSound);
+    document.removeEventListener("touchstart", enableSound);
+    document.removeEventListener("keydown", enableSound);
 }
 
-findVideo();
+document.addEventListener("click", enableSound);
+document.addEventListener("touchstart", enableSound);
+document.addEventListener("keydown", enableSound);
 
-/* --- Prevent pausing completely --- */
+/* ---------- Prevent pausing ---------- */
 
-// If paused for ANY reason, resume instantly
+// instantly resume if paused
 video.addEventListener("pause", () => {
     video.play().catch(()=>{});
 });
 
-// Block keyboard controls (spacebar, k, etc.)
+// block keyboard media controls
 document.addEventListener("keydown", e => {
     e.preventDefault();
 });
 
-// Disable right click
+// disable right click
 document.addEventListener("contextmenu", e => {
     e.preventDefault();
 });
 
-// Force playback continuously
+// safety watchdog
 setInterval(() => {
     if (video.paused) {
         video.play().catch(()=>{});
