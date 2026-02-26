@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" class=""><head><script>window.livecodes = window.livecodes || {};</script><title>Untitled Project</title><meta name="title" content="Untitled Project"><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="./style.css"><script src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js" async=""></script><script type="importmap">{
+  "imports": {}
+}</script></head><body>
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Loop</title>
+
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: black;
+        overflow: hidden;
+    }
+
+    #video {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        min-width: 100%;
+        min-height: 100%;
+        transform: translate(-50%, -50%);
+        object-fit: cover;
+        pointer-events: none; /* prevents clicking */
+    }
+</style>
+
+
+
+
+<video id="video" autoplay="" muted="" loop="" playsinline="" preload="auto">
+</video>
+
+<script>
+/*
+  GitHub Pages cannot truly "scan folders",
+  so we attempt common locations automatically.
+  Add/remove paths if needed.
+*/
+
+const possibleVideos = [
+    "video.mp4",
+    "Video.mp4",
+    "media/video.mp4",
+    "assets/video.mp4",
+    "videos/video.mp4"
+];
+
+const video = document.getElementById("video");
+
+async function findVideo() {
+    for (const path of possibleVideos) {
+        try {
+            const response = await fetch(path, { method: "HEAD" });
+            if (response.ok) {
+                video.src = path;
+                video.play().catch(()=>{});
+                return;
+            }
+        } catch (e) {}
+    }
+
+    console.error("No MP4 file found.");
+}
+
+findVideo();
+
+/* --- Prevent pausing completely --- */
+
+// If paused for ANY reason, resume instantly
+video.addEventListener("pause", () => {
+    video.play().catch(()=>{});
+});
+
+// Block keyboard controls (spacebar, k, etc.)
+document.addEventListener("keydown", e => {
+    e.preventDefault();
+});
+
+// Disable right click
+document.addEventListener("contextmenu", e => {
+    e.preventDefault();
+});
+
+// Force playback continuously
+setInterval(() => {
+    if (video.paused) {
+        video.play().catch(()=>{});
+    }
+}, 500);
+
+</script>
+
+
+<script src="./script.js"></script></body></html>
